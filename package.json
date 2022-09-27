@@ -1,0 +1,26 @@
+{
+  "name": "tes-node-js-dans",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LastAeon/tes-node-js-dans.git"
+  },
+  "author": "Syihabuddin Yahya Muhammad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LastAeon/tes-node-js-dans/issues"
+  },
+  "homepage": "https://github.com/LastAeon/tes-node-js-dans#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1"
+  }
+}
