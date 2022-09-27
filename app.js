@@ -33,8 +33,8 @@ app.post('/login', (req, res) => {
     });
 })
 
-// endpoint job list
 const verifikasi = require('./middleware/auth');
+// endpoint job list
 app.get('/positions.json', verifikasi(), (req, res) => {
     console.log(hostname+req.originalUrl)
     axios.get(hostname+req.originalUrl)
@@ -42,6 +42,16 @@ app.get('/positions.json', verifikasi(), (req, res) => {
         res.status(200).json(queryRes.data)
     })
 });
+
+// endpoint job detail
+app.get('/positions/:id', verifikasi(), (req, res) => {
+    console.log(hostname+req.originalUrl)
+    axios.get(hostname+req.originalUrl)
+    .then(queryRes => {
+        res.status(200).json(queryRes.data)
+    })
+});
+
 
 // start server
 app.listen(PORT, () => {
