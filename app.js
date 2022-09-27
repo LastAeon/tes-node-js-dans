@@ -18,6 +18,7 @@ const hostname = 'http://dev3.dansmultipro.co.id/api/recruitment'
 // endpoint registration and login
 app.post('/registrasi', (req, res) => {
     var username = req.body.username
+    var userCount
 
     if(username === '' || req.body.password === ''){
         return res.status(400).json({success: false, message: "username/password tidak boleh kosong"})
@@ -25,25 +26,27 @@ app.post('/registrasi', (req, res) => {
 
     const querySearch = 'SELECT username FROM user WHERE username = ?'
     koneksi.query(querySearch, username, (error, rows, fields) => {
+        userCount = rows.length
         if(rows.length !== 0){
             return res.status(400).json({success: false, message: "username sudah ada"})
+        } else{
+            bcrypt.hash(req.body.password, 10, (err, hashed_password) => {
+                if(err) {
+                    throw err;
+                } else {
+                    const query = "INSERT INTO user (username, password) VALUES (?,?)";
+                    koneksi.query(query, [username, hashed_password], (error, rows, fields) => {
+                        if(error){
+                            console.log(error);
+                            return res.status(500).json({message: "terjadi kesalahan", error: error});
+                        }
+                        res.status(201).json({success: true, message: 'user berhasil ditambahkan'});
+                    });
+                }
+            })
         }
     })
     
-    bcrypt.hash(req.body.password, 10, (err, hashed_password) => {
-        if(err) {
-            throw err;
-        } else {
-            const query = "INSERT INTO user (username, password) VALUES (?,?)";
-            koneksi.query(query, [username, hashed_password], (error, rows, fields) => {
-                if(error){
-                    console.log(error);
-                    return res.status(500).json({message: "terjadi kesalahan", error: error});
-                }
-                res.status(201).json({success: true, message: 'user berhasil ditambahkan'});
-            });
-        }
-    })
 })
 
 
