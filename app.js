@@ -12,7 +12,7 @@ const PORT = process.env.port || 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
 
-const hostname = 'http://dev3.dansmultipro.co.id/api/recruitment/'
+const hostname = 'http://dev3.dansmultipro.co.id/api/recruitment'
 
 // endpoint login
 app.post('/login', (req, res) => {
@@ -33,6 +33,15 @@ app.post('/login', (req, res) => {
     });
 })
 
+// endpoint job list
+const verifikasi = require('./middleware/auth');
+app.get('/positions.json', verifikasi(), (req, res) => {
+    console.log(hostname+req.originalUrl)
+    axios.get(hostname+req.originalUrl)
+    .then(queryRes => {
+        res.status(200).json(queryRes.data)
+    })
+});
 
 // start server
 app.listen(PORT, () => {
