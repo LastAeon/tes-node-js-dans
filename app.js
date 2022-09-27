@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const koneksi = require('./koneksi');
 
@@ -14,19 +15,58 @@ app.use(bodyParser.urlencoded({extended : false}));
 
 const hostname = 'http://dev3.dansmultipro.co.id/api/recruitment'
 
-// endpoint login
+// endpoint registration and login
+app.post('/registrasi', (req, res) => {
+    var username = req.body.username
+
+    if(username === '' || req.body.password === ''){
+        return res.status(400).json({success: false, message: "username/password tidak boleh kosong"})
+    }
+
+    const querySearch = 'SELECT username FROM user WHERE username = ?'
+    koneksi.query(querySearch, username, (error, rows, fields) => {
+        if(rows.length !== 0){
+            return res.status(400).json({success: false, message: "username sudah ada"})
+        }
+    })
+    
+    bcrypt.hash(req.body.password, 10, (err, hashed_password) => {
+        if(err) {
+            throw err;
+        } else {
+            const query = "INSERT INTO user (username, password) VALUES (?,?)";
+            koneksi.query(query, [username, hashed_password], (error, rows, fields) => {
+                if(error){
+                    console.log(error);
+                    return res.status(500).json({message: "terjadi kesalahan", error: error});
+                }
+                res.status(201).json({success: true, message: 'user berhasil ditambahkan'});
+            });
+        }
+    })
+})
+
+
 app.post('/login', (req, res) => {
     var username = req.body.username
     var password = req.body.password
-    const query = "SELECT * FROM user WHERE username = ? AND password = ?";
-    koneksi.query(query, [username, password], (error, rows, fields) => {
+    const query = "SELECT * FROM user WHERE username = ?";
+    koneksi.query(query, username, (error, rows, fields) => {
         if(error){
             console.log(error);
             return res.status(500).json({message: "terjadi kesalahan", error: error});
         }
         if(rows.length === 1){
-            const jwt_token = jwt.sign({username: rows[0].username}, 'secret')
-            res.status(200).json({success: true, username: rows[0].username, jwt_token})
+            bcrypt.compare(password, rows[0].password, (err, result) => {
+                if(result === true){
+                    const jwt_token = jwt.sign({username: rows[0].username}, 'secret')
+                    res.status(200).json({success: true, username: rows[0].username, jwt_token})
+                }
+                else{
+                    res.status(400).json({success: false, message: "username/password salah"})
+                }
+            })
+            
         } else{
             res.status(400).json({success: false, message: "username/password salah"})
         }
